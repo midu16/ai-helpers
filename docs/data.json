@@ -1725,6 +1725,34 @@
       "version": "0.0.1"
     },
     {
+      "commands": [
+        {
+          "argument_hint": "<path-to-dashboard-yaml> [--check-profile minimal|full] [--explain]",
+          "description": "Analyze and validate an existing Grafana dashboard YAML for correctness, metric availability, and diagnostic coverage",
+          "name": "analyze-dashboard",
+          "synopsis": "/cmo-dashboard:analyze-dashboard <path-to-dashboard-yaml> [--check-profile minimal|full] [--explain]"
+        },
+        {
+          "argument_hint": "<topic> [--panels <panel-descriptions>] [--source <metric-sources>] [--template-vars <variables>]",
+          "description": "Create a standalone Grafana dashboard ConfigMap for the OpenShift cluster-monitoring-operator",
+          "name": "create-dashboard",
+          "synopsis": "/cmo-dashboard:create-dashboard <topic> [--panels <panel-descriptions>] [--source <metric-sources>] [--template-vars <variables>]"
+        }
+      ],
+      "description": "Create and analyze Grafana dashboard ConfigMaps for the OpenShift cluster-monitoring-operator",
+      "has_readme": true,
+      "hooks": [],
+      "name": "cmo-dashboard",
+      "skills": [
+        {
+          "description": "|",
+          "id": "grafana-dashboard-reference",
+          "name": "Grafana Dashboard Reference"
+        }
+      ],
+      "version": "0.0.4"
+    },
+    {
       "commands": [],
       "description": "OpenShift Console dynamic plugin development utilities",
       "has_readme": true,

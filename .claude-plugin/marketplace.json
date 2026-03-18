@@ -221,6 +221,12 @@
       "version": "0.0.1"
     },
     {
+      "name": "cmo-dashboard",
+      "source": "./plugins/cmo-dashboard",
+      "description": "Create and analyze Grafana dashboard ConfigMaps for the OpenShift cluster-monitoring-operator",
+      "version": "0.0.4"
+    },
+    {
       "name": "console",
       "source": "./plugins/console",
       "description": "OpenShift Console dynamic plugin development utilities",

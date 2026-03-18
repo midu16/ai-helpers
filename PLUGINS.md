@@ -6,6 +6,7 @@ This document lists all available Claude Code plugins and their commands in the 
 - [Operator Dashboard](#operator-dashboard-plugin)
 - [Bigquery](#bigquery-plugin)
 - [Ci](#ci-plugin)
+- [Cmo Dashboard](#cmo-dashboard-plugin)
 - [Code Review](#code-review-plugin)
 - [Compliance](#compliance-plugin)
 - [Container Image](#container-image-plugin)
@@ -94,6 +95,16 @@ Tools for working with OpenShift CI and analyzing Prow job results
 - **`/ci:trigger-presubmit` `<job-name> <org> <repo> <base-ref> <base-sha> <pr-number> <pr-sha> [ENV_VAR=value ...]`** - Trigger a presubmit gangway job (typically use GitHub Prow commands instead)
 
 See [plugins/ci/README.md](plugins/ci/README.md) for detailed documentation.
+
+### Cmo Dashboard Plugin
+
+Create and analyze Grafana dashboard ConfigMaps for the OpenShift cluster-monitoring-operator
+
+**Commands:**
+- **`/cmo-dashboard:analyze-dashboard` `<path-to-dashboard-yaml> [--check-profile minimal|full] [--explain]`** - Analyze and validate an existing Grafana dashboard YAML for correctness, metric availability, and diagnostic coverage
+- **`/cmo-dashboard:create-dashboard` `<topic> [--panels <panel-descriptions>] [--source <metric-sources>] [--template-vars <variables>]`** - Create a standalone Grafana dashboard ConfigMap for the OpenShift cluster-monitoring-operator
+
+See [plugins/cmo-dashboard/README.md](plugins/cmo-dashboard/README.md) for detailed documentation.
 
 ### Code Review Plugin
 
