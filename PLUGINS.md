@@ -32,6 +32,7 @@ This document lists all available Claude Code plugins and their commands in the 
 - [Snowflake](#snowflake-plugin)
 - [Sosreport](#sosreport-plugin)
 - [Teams](#teams-plugin)
+- [Telco Reference](#telco-reference-plugin)
 - [Test Coverage](#test-coverage-plugin)
 - [Testing](#testing-plugin)
 - [Utils](#utils-plugin)
@@ -403,6 +404,18 @@ Team structure knowledge and health analysis commands for OpenShift teams
 - **`/teams:list-teams`** - List all teams from the team component mapping
 
 See [plugins/teams/README.md](plugins/teams/README.md) for detailed documentation.
+
+### Telco Reference Plugin
+
+Create, inspect, and compare OpenShift telco reference configurations across releases (telco-core, telco-hub, telco-ran)
+
+**Commands:**
+- **`/telco-reference:create-config` `<use-model> <release> [--operators <list>] [--topology <type>]`** - Generate a telco reference configuration for a specific use model and OpenShift release
+- **`/telco-reference:feature-summary` `<release> [--use-model <model>] [--format <format>]`** - Summarize features, operators, and capabilities available in a telco reference release branch
+- **`/telco-reference:inspect` `<path-or-cr-name> [--release <version>]`** - Inspect and explain telco reference CRs, identifying their purpose, release compatibility, and dependencies
+- **`/telco-reference:upgrade-analysis` `<from-release> <to-release> [--use-model <model>] [--detailed]`** - Analyze migration and upgrade path between two OpenShift telco reference releases
+
+See [plugins/telco-reference/README.md](plugins/telco-reference/README.md) for detailed documentation.
 
 ### Test Coverage Plugin
 

@@ -231,6 +231,12 @@
       "source": "./plugins/console",
       "description": "OpenShift Console dynamic plugin development utilities",
       "version": "0.0.1"
+    },
+    {
+      "name": "telco-reference",
+      "source": "./plugins/telco-reference",
+      "description": "Create, inspect, and compare OpenShift telco reference configurations across releases (telco-core, telco-hub, telco-ran)",
+      "version": "0.0.1"
     }
   ]
 }
