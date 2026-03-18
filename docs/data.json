@@ -1624,6 +1624,46 @@
         }
       ],
       "version": "0.0.4"
+    },
+    {
+      "commands": [
+        {
+          "argument_hint": "<use-model> <release> [--operators <list>] [--topology <type>]",
+          "description": "Generate a telco reference configuration for a specific use model and OpenShift release",
+          "name": "create-config",
+          "synopsis": "/telco-reference:create-config <use-model> <release> [--operators <list>] [--topology <type>]"
+        },
+        {
+          "argument_hint": "<release> [--use-model <model>] [--format <format>]",
+          "description": "Summarize features, operators, and capabilities available in a telco reference release branch",
+          "name": "feature-summary",
+          "synopsis": "/telco-reference:feature-summary <release> [--use-model <model>] [--format <format>]"
+        },
+        {
+          "argument_hint": "<path-or-cr-name> [--release <version>]",
+          "description": "Inspect and explain telco reference CRs, identifying their purpose, release compatibility, and dependencies",
+          "name": "inspect",
+          "synopsis": "/telco-reference:inspect <path-or-cr-name> [--release <version>]"
+        },
+        {
+          "argument_hint": "<from-release> <to-release> [--use-model <model>] [--detailed]",
+          "description": "Analyze migration and upgrade path between two OpenShift telco reference releases",
+          "name": "upgrade-analysis",
+          "synopsis": "/telco-reference:upgrade-analysis <from-release> <to-release> [--use-model <model>] [--detailed]"
+        }
+      ],
+      "description": "Create, inspect, and compare OpenShift telco reference configurations across releases (telco-core, telco-hub, telco-ran)",
+      "has_readme": true,
+      "hooks": [],
+      "name": "telco-reference",
+      "skills": [
+        {
+          "description": "|",
+          "id": "telco-reference-catalogue",
+          "name": "Telco Reference Catalogue"
+        }
+      ],
+      "version": "0.0.1"
     }
   ]
 }
