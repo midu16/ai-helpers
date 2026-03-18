@@ -1,0 +1,8 @@
+{
+  "name": "cmo-dashboard",
+  "description": "Create and analyze Grafana dashboard ConfigMaps for the OpenShift cluster-monitoring-operator",
+  "version": "0.0.4",
+  "author": {
+    "name": "github.com/openshift-eng"
+  }
+}
