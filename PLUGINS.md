@@ -214,6 +214,7 @@ A plugin to automate tasks with Jira
 - **`/jira:generate-feature-doc` `<feature-key>`** - Generate comprehensive feature documentation from Jira feature and all related issues and PRs
 - **`/jira:generate-test-plan` `[JIRA issue key] [GitHub PR URLs]`** - Generate test steps for a JIRA issue
 - **`/jira:grooming` `[project-filter] [time-period] [--component component-name] [--label label-name] [--type issue-type] [--status status] [--story-points]`** - Analyze new bugs and cards added over a time period and generate grooming meeting agenda
+- **`/jira:identify-common-descriptions` `[free-text notes] | <ISSUE-KEY>`** - Given rough text or a Jira key, identify which common Jira description patterns apply and outline sections, gaps, and examples
 - **`/jira:issues-by-component` `<project-key> [time-period] [--component name] [--assignee username] [--reporter username] [--status status] [--search term] [--search-description]`** - List and analyze JIRA issues organized by component with flexible filtering
 - **`/jira:reconcile-github` `[--github-project <org/repo>] [--jira-project <key>] [--profile <name>] [--porcelain] [--output json|yaml]`** - Reconcile state mismatches between GitHub and Jira issues
 - **`/jira:setup-gh2jira`** - Install and configure the gh2jira utility with all required tools and credentials
@@ -410,6 +411,7 @@ A generic utilities plugin serving as a catch-all for various helper commands an
 **Commands:**
 - **`/utils:address-reviews` `[PR number (optional - uses current branch if omitted)]`** - Fetch and address all PR review comments
 - **`/utils:auto-approve-konflux-prs` `<target-repository>`** - Automate approving Konflux bot PRs for the given repository by adding /lgtm and /approve
+- **`/utils:download-clients` `[free-text describing which clients and versions]`** - OpenShift Client Download — interpret natural-language CLI needs, resolve official downloads for OpenShift and related tools, verify integrity, and install binaries to a user-approved prefix
 - **`/utils:generate-test-plan` `[GitHub PR URLs]`** - Generate test steps for one or more related PRs
 - **`/utils:gh-attention` `[--repo <org/repo>]`** - List PRs and issues requiring your attention
 - **`/utils:placeholder`** - Placeholder command for the utils plugin

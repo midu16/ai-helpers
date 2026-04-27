@@ -32,6 +32,10 @@ A placeholder command for testing and development.
 
 Review potential overlaps with existing ai-helpers (Claude Code Plugins, Commands, Skills, Sub-agents, or Hooks) and open PRs.
 
+### `/utils:download-clients`
+
+**OpenShift Client Download** — resolve and install official CLI binaries (OpenShift clients, ROSA, Helm, and related tools) from a natural-language description, with checksum verification when the vendor publishes it.
+
 ## Purpose
 
 The utils plugin serves as a catch-all for commands that don't fit into existing specialized plugins. Once we accumulate several related commands, they can be segregated into a new targeted plugin.

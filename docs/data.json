@@ -145,6 +145,12 @@
           "synopsis": "/jira:grooming [project-filter] [time-period] [--component component-name] [--label label-name] [--type issue-type] [--status status] [--story-points]"
         },
         {
+          "argument_hint": "[free-text notes] | <ISSUE-KEY>",
+          "description": "Given rough text or a Jira key, identify which common Jira description patterns apply and outline sections, gaps, and examples",
+          "name": "identify-common-descriptions",
+          "synopsis": "/jira:identify-common-descriptions [free-text notes]"
+        },
+        {
           "argument_hint": "<project-key> [time-period] [--component name] [--assignee username] [--reporter username] [--status status] [--search term] [--search-description]",
           "description": "List and analyze JIRA issues organized by component with flexible filtering",
           "name": "issues-by-component",
@@ -201,6 +207,11 @@
           "description": "Jira conventions for the CNTRLPLANE project used by OpenShift teams",
           "id": "cntrlplane",
           "name": "CNTRLPLANE Jira Conventions"
+        },
+        {
+          "description": "Map free-text notes or an existing issue into common Jira description archetypes with section outlines, recognition signals, and OpenShift-oriented examples",
+          "id": "common-jira-descriptions",
+          "name": "Common Jira Description Patterns"
         },
         {
           "description": "Implementation guide for creating well-formed Jira bug reports",
@@ -278,7 +289,7 @@
           "name": "Jira Status Analysis Engine"
         }
       ],
-      "version": "0.3.6"
+      "version": "0.3.7"
     },
     {
       "commands": [
@@ -779,6 +790,12 @@
           "synopsis": ""
         },
         {
+          "argument_hint": "[free-text describing which clients and versions]",
+          "description": "OpenShift Client Download \u2014 interpret natural-language CLI needs, resolve official downloads for OpenShift and related tools, verify integrity, and install binaries to a user-approved prefix",
+          "name": "download-clients",
+          "synopsis": "/utils:download-clients [free-text describing which clients and versions]"
+        },
+        {
           "argument_hint": "[GitHub PR URLs]",
           "description": "Generate test steps for one or more related PRs",
           "name": "generate-test-plan",
@@ -819,8 +836,14 @@
       "has_readme": true,
       "hooks": [],
       "name": "utils",
-      "skills": [],
-      "version": "0.0.7"
+      "skills": [
+        {
+          "description": "OpenShift Client Download \u2014 select, verify, and install official CLI binaries (OpenShift oc/kubectl/openshift-install, ROSA, Helm, opm, operator-sdk, and common helpers) from user-described needs on Linux or macOS, using mirror and vendor sites with checksum verification when available",
+          "id": "openshift-client-download",
+          "name": "OpenShift Client Download"
+        }
+      ],
+      "version": "0.0.9"
     },
     {
       "commands": [
