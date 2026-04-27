@@ -9,6 +9,7 @@ Comprehensive Jira integration for Claude Code, providing AI-powered tools to an
 - 📝 **Weekly Status Updates** - Automate weekly status summary updates with intelligent activity analysis and color-coded health indicators
 - 📋 **Backlog Grooming** - Analyze new bugs and cards for grooming meetings
 - 🏷️ **Activity Type Categorization** - AI-powered categorization of JIRA tickets into activity types with confidence scoring
+- 🧭 **Common Description Patterns** - From rough notes or an issue key, identify typical Jira description archetypes and section outlines
 - 🧪 **Test Generation** - Generate comprehensive test steps for JIRA issues by analyzing related PRs
 - ✨ **Issue Creation** - Create well-formed stories, epics, features, tasks, bugs, and feature requests with guided workflows
 - 📝 **Release Note Generation** - Automatically generate bug fix release notes from Jira and linked GitHub PRs
@@ -145,6 +146,20 @@ Analyze JIRA tickets and automatically assign Activity Type categories based on 
 ```
 
 See [commands/categorize-activity-type.md](commands/categorize-activity-type.md) for full documentation.
+
+---
+
+### `/jira:identify-common-descriptions` - Common Jira Description Patterns
+
+Given **free-text notes** or a **Jira issue key**, map the content to common engineering description archetypes (incident, CI regression, upgrade failure, bug, performance, security, docs, RFE, tech debt, operator/OLM, networking, storage, and others). Returns which patterns fit, **why**, recommended **sections**, **gaps**, and an optional bullet skeleton—without inventing facts not in the source.
+
+**Usage:**
+```bash
+/jira:identify-common-descriptions upgrade stuck on 4.15 CVO degraded etcd timeouts
+/jira:identify-common-descriptions OCPBUGS-12345
+```
+
+See [commands/identify-common-descriptions.md](commands/identify-common-descriptions.md) for full documentation.
 
 ---
 
