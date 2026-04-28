@@ -152,8 +152,14 @@ h3. RDS Analyzer Report Data
 *CR Name:* {CR Name}
 
 h3. Unresolved Differences
+h4. expected but not found
 {code:yaml}
-{Complete Diff Details}
+{Expected-but-not-found content only}
+{code}
+
+h4. found but not expected
+{code:yaml}
+{Found-but-not-expected content only}
 {code}
 ```
 
@@ -163,9 +169,22 @@ h3. Unresolved Differences
    - Template line exists and starts with `Template:`
    - CR line exists and starts with `CR Name:`
    - Diff body starts with `expected:` or `expected but not found:`
+   - At least one diff section is extractable (`expected but not found` and/or `found but not expected`)
 8. If validation fails for a block, skip creation for that block and append a parsing error entry for final reporting.
 9. Create issue with component/labels/version metadata.
 10. Run related-ticket discovery, linking, and optional Release Note Text propagation comment flow (same as Step 4).
+
+### Step 5.1 - Diff section formatting rules
+
+When building the Jira description for diff blocks:
+
+1. Parse unresolved differences into named sections:
+   - `expected but not found:`
+   - `found but not expected:`
+2. Render each present section in its own YAML code block.
+3. Do not merge both sections into one code block.
+4. Preserve exact indentation and markers (`>>`) inside each section body.
+5. If only one section exists, include only that section heading and code block.
 
 ### Step 6 - Use the supporting skill
 
