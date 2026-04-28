@@ -20,6 +20,41 @@ Additionally, classify each generated ticket draft using common Jira description
 
 If `--file` / `-f` is used and the file cannot be read, report the error and stop (no Jira work).
 
+## Optional `--partner` / `-p` and ACCT linking
+
+When the command includes `--partner` or `-p` with a value:
+
+1. Parse the value (see `jira:analyze-rds-report` Step 1 and Step 1.6). Normalize case and whitespace.
+2. Match **vendor** to one of: Nokia, Ericsson, Mavenir, Samsung, ZTE, Intel. Optional second token: **RAN** or **CORE** only. Vendor alone is valid (same ACCT issue as RAN/CORE for that vendor).
+3. **Static map** (do not JQL for ACCT keys):
+
+| Vendor | ACCT key | Browse URL |
+|--------|----------|------------|
+| Nokia | ACCT-37 | https://redhat.atlassian.net/browse/ACCT-37 |
+| Ericsson | ACCT-57 | https://redhat.atlassian.net/browse/ACCT-57 |
+| Mavenir | ACCT-698 | https://redhat.atlassian.net/browse/ACCT-698 |
+| Samsung | ACCT-60 | https://redhat.atlassian.net/browse/ACCT-60 |
+| ZTE | ACCT-23 | https://redhat.atlassian.net/browse/ACCT-23 |
+| Intel | ACCT-59 | https://redhat.atlassian.net/browse/ACCT-59 |
+
+4. If the flag is set but the value is not a valid vendor/segment combination, stop before creating ECOPS issues and list allowed forms.
+
+5. For **each** Section B ECOPS issue created when partner resolution succeeded:
+   - Append to the issue description (after Description Pattern Analysis, or at end if skipped):
+
+```
+h3. Partner account (ACCT)
+
+*Partner context:* {Canonical label}
+*ACCT reference:* [{ACCT-KEY}|https://redhat.atlassian.net/browse/{ACCT-KEY}]
+```
+
+   - Create issue link **relates to** from the new ECOPS issue **outward** to the ACCT issue.
+
+6. Summarize ACCT links in the final response (ECOPS key → ACCT key/URL).
+
+When `--partner` / `-p` is omitted, do not add ACCT blocks or links.
+
 ## Report shape validation (mandatory gate)
 
 Before applying any rule below, verify the input matches the **RDS Analyzer export shape**. If not, **stop** and output only the user-facing message defined in the `jira:analyze-rds-report` command (Step 1.5.1). Do not create Jira issues.
@@ -267,6 +302,7 @@ For related-ticket enrichment:
 - Use issue search to find candidate related deviations
 - Use issue link creation with `relates to`
 - Use issue comment creation for propagated Release Note Text context
+- When `--partner` / `-p` is set, also use `relates to` from each new ECOPS issue to the resolved ACCT issue (see **Optional `--partner` / `-p` and ACCT linking**)
 
 For description-pattern enrichment:
 
@@ -295,6 +331,7 @@ Always return:
    - Related tickets linked per created issue (if any)
    - Release Note Text propagation comments added (if any)
    - Description pattern distribution across created tickets
+   - ACCT partner **relates to** links per new ECOPS issue when `--partner` / `-p` was used
 3. Parsing errors, if any, so user can manually review report content
 
 If no Section B items were parsed, still return the mandatory Section A statement and explicitly note that no ECOPS tickets were created.

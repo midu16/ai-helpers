@@ -1,6 +1,6 @@
 ---
 description: Parse RDS Analyzer reports and create ECOPS guidance tasks for section B items
-argument-hint: "[--file <path.md>] | [full RDS Analyzer report text]"
+argument-hint: "[--file <path.md>] [--partner <vendor> [RAN|CORE]] | [full RDS Analyzer report text]"
 ---
 
 ## Name
@@ -8,7 +8,7 @@ jira:analyze-rds-report
 
 ## Synopsis
 ```
-/jira:analyze-rds-report [--file|-f <path>] [full RDS Analyzer report text]
+/jira:analyze-rds-report [--file|-f <path>] [--partner|-p <vendor> [RAN|CORE]] [full RDS Analyzer report text]
 ```
 
 ## Description
@@ -25,21 +25,25 @@ The `jira:analyze-rds-report` command analyzes an RDS Analyzer report and applie
   - Inferred use-case labels (`ran`, `core`, `hub`) when determinable
   - OCP version (custom field when resolvable; label fallback)
   - Common Jira description archetype analysis and documentation
+- Optionally (`--partner` / `-p`), it resolves the telco vendor (and RAN vs CORE when given) to a partner **ACCT** issue in Jira, documents that reference on each created ECOPS ticket, and adds a Jira **relates to** link between each new ECOPS issue and the ACCT issue.
 
 This command is intended for operational triage where missing optional CR guidance and unresolved configuration diffs must be routed to the telco team.
 
 ## Implementation
 
-### Step 1 - Collect report text
+### Step 1 - Collect report text and optional partner
 
 1. Parse `$ARGUMENTS` for `--file <path>` or `-f <path>` (path may be quoted if it contains spaces).
-2. If `--file` or `-f` is present:
+2. Parse optional `--partner <value>` or `-p <value>`:
+   - The value is everything after the flag until the next token that starts with `--` (or end of arguments). Examples: `--partner Nokia RAN`, `-p Ericsson CORE`, `--partner "Samsung RAN"`.
+   - If the flag appears with no value, stop and list allowed partner forms (see **Step 1.6**).
+3. If `--file` or `-f` is present:
    - Read the file from disk as UTF-8 text (treat a leading UTF-8 BOM as optional; strip only the BOM for processing, not other content).
    - If the path is missing, the file is not readable, or decoding fails, stop and report a clear file error. Do not create Jira issues.
    - Ignore any additional non-flag text in `$ARGUMENTS` when `--file` / `-f` supplies the report (the file is the sole source).
-3. If no file flag: treat the remainder of `$ARGUMENTS` as the inline report body.
-4. If there is no file and the inline body is empty, ask the user to paste the full RDS Analyzer report or pass `--file` / `-f` with a path to a Markdown (`.md`) file containing the report.
-5. Preserve original whitespace after validation. Do not normalize indentation in diff content.
+4. If no file flag: treat the remainder of `$ARGUMENTS` (after removing consumed flags and partner tokens) as the inline report body.
+5. If there is no file and the inline body is empty, ask the user to paste the full RDS Analyzer report or pass `--file` / `-f` with a path to a Markdown (`.md`) file containing the report.
+6. Preserve original whitespace after validation. Do not normalize indentation in diff content.
 
 ### Step 1.5 - Validate RDS Analyzer report shape (hard gate)
 
@@ -68,6 +72,43 @@ RDS Analyzer exports a fixed structure. Your file or paste must include, in orde
 
 Save or copy the full output from the RDS Analyzer tool (including those headings and the separator line) as Markdown if you use a .md file. {optional-path-hint}
 ```
+
+### Step 1.6 - Resolve `--partner` to an ACCT issue (optional)
+
+Run this after Step 1.5 passes. When `--partner` / `-p` is **not** set, skip this entire step and do not add ACCT links or Partner blocks on issues.
+
+When it **is** set:
+
+1. **Normalize** the user text: trim, collapse internal whitespace, compare **case-insensitively**.
+2. **Match vendor and optional segment:** Known vendors are exactly: Nokia, Ericsson, Mavenir, Samsung, ZTE, Intel. The normalized string must start with one of these names (whole word). Optionally the same string may include a second whole word **`RAN`** or **`CORE`** (for example `nokia ran`, `ERICSSON CORE`, `Mavenir`). If extra tokens appear (for example `Nokia RAN Extra`), treat as invalid.
+3. **Canonical label:** If `RAN` or `CORE` is present, use `{Vendor} RAN` or `{Vendor} CORE` (proper casing) for *Partner context*. If only the vendor appears, use `{Vendor}`.
+4. **Map vendor to ACCT issue key** (RAN and CORE use the **same** ACCT issue per vendor). Base URL for browse links: `https://redhat.atlassian.net/browse/`.
+
+| Vendor | ACCT key |
+|--------|----------|
+| Nokia | ACCT-37 |
+| Ericsson | ACCT-57 |
+| Mavenir | ACCT-698 |
+| Samsung | ACCT-60 |
+| ZTE | ACCT-23 |
+| Intel | ACCT-59 |
+
+5. If the value does not match any vendor or has invalid extra tokens, **stop before creating Jira issues** and respond with a short error listing allowed values: Nokia, Ericsson, Mavenir, Samsung, ZTE, Intel — each optional with `RAN` or `CORE` (examples: `Nokia RAN`, `ericsson core`).
+
+6. **Per new Section B ECOPS issue:** When building the **full** description for issue create, append the following block **after** the `h3. Description Pattern Analysis` section (or at the end of the description if pattern analysis is skipped):
+
+```
+h3. Partner account (ACCT)
+
+*Partner context:* {Canonical partner label}
+*ACCT reference:* [{ACCT-KEY}|https://redhat.atlassian.net/browse/{ACCT-KEY}]
+```
+
+7. **After** each such ECOPS issue is created, add a Jira issue link from the **new ECOPS issue** to the **ACCT issue** with link type **relates to**.
+
+8. In the **Step 7** final response, add **ACCT partner links**: for each new ECOPS key, the ACCT key (and URL) linked via relates to.
+
+9. Do not search Jira to discover ACCT keys; use the table only.
 
 ### Step 2 - Parse required sections
 
@@ -261,6 +302,7 @@ Follow [skills/rds-report-analyzer/SKILL.md](../skills/rds-report-analyzer/SKILL
 - Parsing strategy details
 - Grouping logic for missing CRs
 - Validation and error recording
+- Optional `--partner` / `-p` resolution and ACCT **relates to** linking
 - Related-ticket linking and release-note propagation comment rules
 - Use-case label and OCP version inference rules
 - Common Jira description analysis and pattern documentation rules
@@ -278,11 +320,13 @@ Return:
    - Related tickets linked per new issue (if any)
    - Related-ticket Release Note Text comments added (if any)
    - Description pattern distribution (primary patterns across created tickets)
+   - **ACCT partner links** (if `--partner` / `-p` was used): each new ECOPS issue and the ACCT issue key/URL linked with **relates to**
 3. Parsing errors encountered (if any), so the user can manually review those report blocks.
 
 ## Arguments
 
 - **`--file` / `-f`**: Path to a Markdown (`.md`) file whose body is the full RDS Analyzer report (same text you would paste inline).
+- **`--partner` / `-p`**: Optional telco vendor and segment for ACCT linking. Accepts vendor alone (`Nokia`, `zte`) or vendor plus `RAN` / `CORE` (case-insensitive, flexible spacing). See Step 1.6 for the vendor-to-ACCT map and Jira URL base `https://redhat.atlassian.net/browse/`.
 - **Free text report**: Full RDS Analyzer report body including section headings and separators, when no file flag is used.
 
 ## Return Value
@@ -292,9 +336,14 @@ Return:
   - Ticket creation counts by subsection
   - Created issue keys + links
   - Common description patterns documented per issue
+  - ACCT partner link summary when `--partner` / `-p` was set
   - Parsing/validation errors, if present
 
 ## Examples
+
+```
+/jira:analyze-rds-report --file ./cluster-rds-report.md --partner "Nokia RAN"
+```
 
 ```
 /jira:analyze-rds-report --file ./cluster-rds-report.md

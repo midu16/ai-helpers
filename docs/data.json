@@ -97,10 +97,10 @@
     {
       "commands": [
         {
-          "argument_hint": "[--file <path.md>] | [full RDS Analyzer report text]",
+          "argument_hint": "[--file <path.md>] [--partner <vendor> [RAN|CORE]] | [full RDS Analyzer report text]",
           "description": "Parse RDS Analyzer reports and create ECOPS guidance tasks for section B items",
           "name": "analyze-rds-report",
-          "synopsis": "/jira:analyze-rds-report [--file|-f <path>] [full RDS Analyzer report text]"
+          "synopsis": "/jira:analyze-rds-report [--file|-f <path>] [--partner|-p <vendor> [RAN|CORE]] [full RDS Analyzer report text]"
         },
         {
           "argument_hint": "[project-key] [--assignee username] [--days-inactive N]",
@@ -322,7 +322,7 @@
           "name": "Jira Status Analysis Engine"
         }
       ],
-      "version": "0.4.2"
+      "version": "0.4.3"
     },
     {
       "commands": [
