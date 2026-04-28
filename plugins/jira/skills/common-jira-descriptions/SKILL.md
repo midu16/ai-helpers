@@ -1,7 +1,6 @@
 ---
 name: Common Jira Description Patterns
 description: Map free-text notes or an existing issue into common Jira description archetypes with section outlines, recognition signals, and OpenShift-oriented examples
-command: /jira:identify-common-descriptions
 ---
 
 # Common Jira Description Patterns

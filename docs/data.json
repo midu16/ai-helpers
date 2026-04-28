@@ -97,6 +97,12 @@
     {
       "commands": [
         {
+          "argument_hint": "[full RDS Analyzer report text]",
+          "description": "Parse RDS Analyzer reports and create ECOPS guidance tasks for section B items",
+          "name": "analyze-rds-report",
+          "synopsis": "/jira:analyze-rds-report [full RDS Analyzer report text]"
+        },
+        {
           "argument_hint": "[project-key] [--assignee username] [--days-inactive N]",
           "description": "Find suitable JIRA tickets from the backlog to work on based on priority and activity",
           "name": "backlog",
@@ -284,12 +290,17 @@
           "name": "OCPBUGS Jira Conventions"
         },
         {
+          "description": "Parse RDS Analyzer reports and create ECOPS guidance tasks for section B while enforcing no-ticket handling for section A",
+          "id": "rds-report-analyzer",
+          "name": "RDS Report Analyzer"
+        },
+        {
           "description": "Shared engine for analyzing Jira issue activity and generating status summaries",
           "id": "status-analysis",
           "name": "Jira Status Analysis Engine"
         }
       ],
-      "version": "0.3.7"
+      "version": "0.3.8"
     },
     {
       "commands": [

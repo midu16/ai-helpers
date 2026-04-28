@@ -206,6 +206,7 @@ See [plugins/hello-world/README.md](plugins/hello-world/README.md) for detailed 
 A plugin to automate tasks with Jira
 
 **Commands:**
+- **`/jira:analyze-rds-report` `[full RDS Analyzer report text]`** - Parse RDS Analyzer reports and create ECOPS guidance tasks for section B items
 - **`/jira:backlog` `[project-key] [--assignee username] [--days-inactive N]`** - Find suitable JIRA tickets from the backlog to work on based on priority and activity
 - **`/jira:categorize-activity-type` `<issue-key> [--auto-apply]`** - Categorize JIRA tickets into activity types using AI
 - **`/jira:clone-from-github` `<issue-number> [issue-number...] [--github-project <org/repo>] [--jira-project <key>] [--dryrun]`** - Clone GitHub issues to Jira with proper formatting and linking
