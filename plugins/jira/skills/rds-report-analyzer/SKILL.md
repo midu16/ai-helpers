@@ -141,10 +141,26 @@ h3. RDS Analyzer Report Data
 *CR Name:* {CR Name}
 
 h3. Unresolved Differences
+h4. expected but not found
 {code:yaml}
-{Complete Diff Details}
+{Expected-but-not-found content only}
+{code}
+
+h4. found but not expected
+{code:yaml}
+{Found-but-not-expected content only}
 {code}
 ```
+
+Diff presentation rules:
+
+1. Parse and separate unresolved diff into section buckets:
+   - `expected but not found:`
+   - `found but not expected:`
+2. Render each existing bucket as its own `{code:yaml}` block.
+3. Never put both buckets in a single code block.
+4. Preserve original indentation, blank lines, and `>>` markers inside each bucket.
+5. If only one bucket exists in the source, output only that bucket heading + code block.
 
 ### 2b.1 - Metadata inference (labels + version)
 
@@ -161,6 +177,7 @@ For each diff block, validate:
 1. Template name extracted from a line with `Template:`
 2. CR name extracted from a line with `CR Name:`
 3. Diff body starts with `expected:` or `expected but not found:`
+4. At least one diff bucket is extractable (`expected but not found` and/or `found but not expected`)
 
 On validation failure:
 
