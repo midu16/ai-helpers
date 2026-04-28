@@ -24,6 +24,7 @@ The `jira:analyze-rds-report` command analyzes an RDS Analyzer report and applie
   - Related ECOPS deviations (component `RDS Deviation`)
   - Inferred use-case labels (`ran`, `core`, `hub`) when determinable
   - OCP version (custom field when resolvable; label fallback)
+  - Common Jira description archetype analysis and documentation
 
 This command is intended for operational triage where missing optional CR guidance and unresolved configuration diffs must be routed to the telco team.
 
@@ -96,13 +97,42 @@ While marked as optional, these CRs are expected in most clusters. Please clarif
 5. Create issue via MCP Jira create tool with:
    - `components=["RDS Deviation"]`
    - labels including `ai-generated-jira`, `rds-deviation`, inferred use-case labels, and optional OCP fallback label.
-6. Discover related ECOPS deviation tickets and enrich:
+6. Run common-description analysis before create:
+   - Build an analysis bundle from group name, CR name(s), template paths, and guidance text.
+   - Invoke [skills/common-jira-descriptions/SKILL.md](../skills/common-jira-descriptions/SKILL.md) scoring method.
+   - Capture:
+     - primary pattern + confidence
+     - secondary patterns (if any)
+     - section checklist
+     - top gaps
+7. Append analysis documentation to issue description:
+
+```
+h3. Description Pattern Analysis
+
+*Primary Pattern:* {Pattern Name} ({Confidence})
+*Secondary Patterns:* {Pattern 2, Pattern 3 or N/A}
+
+h4. Suggested Jira Sections
+{code}
+- {Section A}
+- {Section B}
+{code}
+
+h4. Missing Information / Gaps
+{code}
+- {Gap A}
+- {Gap B}
+{code}
+```
+
+8. Discover related ECOPS deviation tickets and enrich:
    - Search ECOPS with JQL constrained to component `RDS Deviation` and deviation-specific terms derived from group/CR/template names.
    - Exclude the newly created issue key.
    - For each high-confidence match:
      - add issue link (`relates to`)
      - include in final response "Related tickets attached" list
-7. If a related ticket appears impacting and has Release Note Text:
+9. If a related ticket appears impacting and has Release Note Text:
    - Treat as impacting when priority is `Blocker`/`Critical`, or labels/status include obvious impact markers.
    - If Release Note Text is present, post a comment on the new ticket:
 
@@ -165,14 +195,19 @@ h4. found but not expected
 
 6. Infer metadata before create:
    - Same use-case and OCP version logic as Step 4.
-7. Validate before create:
+7. Run common-description analysis before create:
+   - Build analysis bundle from template name, CR name, unresolved-difference text, and optional report context.
+   - Invoke [skills/common-jira-descriptions/SKILL.md](../skills/common-jira-descriptions/SKILL.md) scoring method.
+   - Capture primary/secondary patterns, checklist, and gaps.
+8. Append analysis documentation to issue description using the same "Description Pattern Analysis" section format as Step 4.
+9. Validate before create:
    - Template line exists and starts with `Template:`
    - CR line exists and starts with `CR Name:`
    - Diff body starts with `expected:` or `expected but not found:`
    - At least one diff section is extractable (`expected but not found` and/or `found but not expected`)
-8. If validation fails for a block, skip creation for that block and append a parsing error entry for final reporting.
-9. Create issue with component/labels/version metadata.
-10. Run related-ticket discovery, linking, and optional Release Note Text propagation comment flow (same as Step 4).
+10. If validation fails for a block, skip creation for that block and append a parsing error entry for final reporting.
+11. Create issue with component/labels/version metadata.
+12. Run related-ticket discovery, linking, and optional Release Note Text propagation comment flow (same as Step 4).
 
 ### Step 5.1 - Diff section formatting rules
 
@@ -195,6 +230,7 @@ Follow [skills/rds-report-analyzer/SKILL.md](../skills/rds-report-analyzer/SKILL
 - Validation and error recording
 - Related-ticket linking and release-note propagation comment rules
 - Use-case label and OCP version inference rules
+- Common Jira description analysis and pattern documentation rules
 - Final response formatting rules
 
 ### Step 7 - Final response format
@@ -208,6 +244,7 @@ Return:
    - List of created issue keys and links
    - Related tickets linked per new issue (if any)
    - Related-ticket Release Note Text comments added (if any)
+   - Description pattern distribution (primary patterns across created tickets)
 3. Parsing errors encountered (if any), so the user can manually review those report blocks.
 
 ## Arguments
@@ -220,6 +257,7 @@ Return:
   - Mandatory Section A no-ticket statement
   - Ticket creation counts by subsection
   - Created issue keys + links
+  - Common description patterns documented per issue
   - Parsing/validation errors, if present
 
 ## Examples
