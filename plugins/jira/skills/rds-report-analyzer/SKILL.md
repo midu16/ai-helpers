@@ -11,6 +11,8 @@ This skill is the implementation guide for `/jira:analyze-rds-report`.
 
 You are the **RDS Report Analyzer**. Process RDS Analyzer reports, parse the two required sections, and create Jira tickets only for guidance-required items according to the business rules below.
 
+Additionally, classify each generated ticket draft using common Jira description archetypes and document that analysis in the created issue.
+
 ## Required Input Structure
 
 The report is expected to include these section headers:
@@ -103,6 +105,41 @@ After creating each issue:
    - Add a comment to the new ticket with the related ticket reference and quoted Release Note Text.
 5. Record all linked related keys and all propagation-comment source keys for final reporting.
 
+### 2a.3 - Common Jira description classification
+
+Before finalizing issue description:
+
+1. Build analysis text from:
+   - Group name
+   - CR name(s)
+   - Missing template paths
+   - Guidance-required narrative
+2. Apply taxonomy from [common-jira-descriptions](../common-jira-descriptions/SKILL.md):
+   - Score archetypes
+   - Select primary pattern + confidence
+   - Select secondary patterns (up to 2)
+   - Generate section checklist and gaps
+3. Append this section to the description:
+
+```
+h3. Description Pattern Analysis
+
+*Primary Pattern:* {Pattern Name} ({Confidence})
+*Secondary Patterns:* {Pattern 2, Pattern 3 or N/A}
+
+h4. Suggested Jira Sections
+{code}
+- {Section A}
+- {Section B}
+{code}
+
+h4. Missing Information / Gaps
+{code}
+- {Gap A}
+- {Gap B}
+{code}
+```
+
 ### 2b - Diffs requiring review
 
 Identification:
@@ -170,6 +207,17 @@ Apply the same label/version inference as section 2a before creating each diff t
 
 Apply the same related-ticket linking and Release Note Text propagation flow as section 2a after each diff ticket is created.
 
+### 2b.3 - Common Jira description classification
+
+Before finalizing issue description:
+
+1. Build analysis text from:
+   - Template name
+   - CR name
+   - Unresolved differences body (both buckets)
+2. Apply taxonomy from [common-jira-descriptions](../common-jira-descriptions/SKILL.md).
+3. Append the same `h3. Description Pattern Analysis` block used in section 2a.
+
 ## Validation Rules
 
 For each diff block, validate:
@@ -200,6 +248,12 @@ For related-ticket enrichment:
 - Use issue link creation with `relates to`
 - Use issue comment creation for propagated Release Note Text context
 
+For description-pattern enrichment:
+
+- Use the common description taxonomy to classify each ticket before create
+- Store the primary pattern for final response rollup
+- Keep analysis grounded in report content (no fabricated facts)
+
 ## Jira Creation
 
 Use Jira issue creation MCP tool for each issue:
@@ -220,6 +274,7 @@ Always return:
    - List of issue keys and links
    - Related tickets linked per created issue (if any)
    - Release Note Text propagation comments added (if any)
+   - Description pattern distribution across created tickets
 3. Parsing errors, if any, so user can manually review report content
 
 If no Section B items were parsed, still return the mandatory Section A statement and explicitly note that no ECOPS tickets were created.
