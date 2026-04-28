@@ -25,20 +25,12 @@ If `--file` / `-f` is used and the file cannot be read, report the error and sto
 When the command includes `--partner` or `-p` with a value:
 
 1. Parse the value (see `jira:analyze-rds-report` Step 1 and Step 1.6). Normalize case and whitespace.
-2. Match **vendor** to one of: Nokia, Ericsson, Mavenir, Samsung, ZTE, Intel. Optional second token: **RAN** or **CORE** only. Vendor alone is valid (same ACCT issue as RAN/CORE for that vendor).
-3. **Static map** (do not JQL for ACCT keys):
-
-| Vendor | ACCT key | Browse URL |
-|--------|----------|------------|
-| Nokia | ACCT-37 | https://redhat.atlassian.net/browse/ACCT-37 |
-| Ericsson | ACCT-57 | https://redhat.atlassian.net/browse/ACCT-57 |
-| Mavenir | ACCT-698 | https://redhat.atlassian.net/browse/ACCT-698 |
-| Samsung | ACCT-60 | https://redhat.atlassian.net/browse/ACCT-60 |
-| ZTE | ACCT-23 | https://redhat.atlassian.net/browse/ACCT-23 |
-| Intel | ACCT-59 | https://redhat.atlassian.net/browse/ACCT-59 |
-
-4. If the flag is set but the value is not a valid vendor/segment combination, stop before creating ECOPS issues and list allowed forms.
-
+2. Match **vendor** to one of: Nokia, Ericsson, Mavenir, Samsung, ZTE, Intel. Optional second token: **RAN** or **CORE** only. Vendor alone is valid; the ACCT issue must still be found by search (naming may be vendor-only on the Jira side).
+3. If the flag is set but the value is not a valid vendor/segment combination, stop before creating ECOPS issues and list allowed forms.
+4. **Resolve ACCT by Jira search** — no hardcoded keys, no table fallback:
+   - Project **`ACCT`** on `redhat.atlassian.net`. Build a **canonical label** (`{Vendor} RAN`, `{Vendor} CORE`, or `{Vendor}`).
+   - Run JQL / issue search: start tight (summary phrase ~ canonical label), broaden to `text ~` vendor + segment tokens only if needed.
+   - **Rank** candidates by summary (then description) match to the canonical label. **Pick one** only if it clearly wins. **Zero** strong matches → stop and report queries tried. **Tie** → stop and list candidate keys/summaries for user disambiguation.
 5. For **each** Section B ECOPS issue created when partner resolution succeeded:
    - Append to the issue description (after Description Pattern Analysis, or at end if skipped):
 
@@ -49,9 +41,9 @@ h3. Partner account (ACCT)
 *ACCT reference:* [{ACCT-KEY}|https://redhat.atlassian.net/browse/{ACCT-KEY}]
 ```
 
-   - Create issue link **relates to** from the new ECOPS issue **outward** to the ACCT issue.
+   - Create issue link **relates to** from the new ECOPS issue **outward** to the **search-resolved** ACCT issue.
 
-6. Summarize ACCT links in the final response (ECOPS key → ACCT key/URL).
+6. Summarize ACCT links in the final response (ECOPS key → ACCT key/URL) and how the ACCT issue was matched.
 
 When `--partner` / `-p` is omitted, do not add ACCT blocks or links.
 

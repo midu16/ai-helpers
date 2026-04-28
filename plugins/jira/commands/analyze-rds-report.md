@@ -82,19 +82,19 @@ When it **is** set:
 1. **Normalize** the user text: trim, collapse internal whitespace, compare **case-insensitively**.
 2. **Match vendor and optional segment:** Known vendors are exactly: Nokia, Ericsson, Mavenir, Samsung, ZTE, Intel. The normalized string must start with one of these names (whole word). Optionally the same string may include a second whole word **`RAN`** or **`CORE`** (for example `nokia ran`, `ERICSSON CORE`, `Mavenir`). If extra tokens appear (for example `Nokia RAN Extra`), treat as invalid.
 3. **Canonical label:** If `RAN` or `CORE` is present, use `{Vendor} RAN` or `{Vendor} CORE` (proper casing) for *Partner context*. If only the vendor appears, use `{Vendor}`.
-4. **Map vendor to ACCT issue key** (RAN and CORE use the **same** ACCT issue per vendor). Base URL for browse links: `https://redhat.atlassian.net/browse/`.
-
-| Vendor | ACCT key |
-|--------|----------|
-| Nokia | ACCT-37 |
-| Ericsson | ACCT-57 |
-| Mavenir | ACCT-698 |
-| Samsung | ACCT-60 |
-| ZTE | ACCT-23 |
-| Intel | ACCT-59 |
-
-5. If the value does not match any vendor or has invalid extra tokens, **stop before creating Jira issues** and respond with a short error listing allowed values: Nokia, Ericsson, Mavenir, Samsung, ZTE, Intel — each optional with `RAN` or `CORE` (examples: `Nokia RAN`, `ericsson core`).
-
+4. If the value does not match any vendor or has invalid extra tokens, **stop before creating Jira issues** and respond with a short error listing allowed values: Nokia, Ericsson, Mavenir, Samsung, ZTE, Intel — each optional with `RAN` or `CORE` (examples: `Nokia RAN`, `ericsson core`).
+5. **Resolve the ACCT issue by dynamic Jira search** (mandatory). Do **not** use a hardcoded vendor→key table and do **not** fall back to a default key if search is inconclusive.
+   - **Browse base:** `https://redhat.atlassian.net/browse/{KEY}`.
+   - **Search scope:** project **`ACCT`** only. Use the Jira issue search / JQL facilities available in the agent (MCP or equivalent).
+   - **Queries (try in order, broaden only when the prior step returns zero issues):**
+     1. Prefer matching **human-visible naming** to the **canonical label**. Start with a tight JQL such as phrase-style match on summary when supported, for example `project = ACCT AND summary ~ "\"Nokia RAN\""` — adjust quoting and operators to valid Jira Cloud JQL for your tool.
+     2. If vendor-only: `project = ACCT AND summary ~ "Nokia"` (then rank carefully; see below).
+     3. If still no candidates: broaden with `text ~` / `description ~` so **vendor** appears and, when the user specified a segment, **`RAN`** or **`CORE`** appears (both should align with the canonical label).
+   - **Ranking:** Score candidates by how well **summary** (then **description**) matches the canonical label as a substring (case-insensitive). When segment was specified, strongly prefer issues whose naming clearly reflects **both** vendor and **RAN** or **CORE**. Deprioritize issues that only match one token or look unrelated.
+   - **Selection (no fallback key):**
+     - **One clear best match:** use that issue key for all subsequent steps.
+     - **Zero matches after reasonable attempts:** stop before creating ECOPS issues; report failure, include the **canonical label** and the **JQL (or queries) tried**.
+     - **Ambiguous** (tie between two or more, or no candidate clearly ahead): stop before creating ECOPS issues; list **top candidates** (issue key + summary) and ask the user to pick or refine `--partner`.
 6. **Per new Section B ECOPS issue:** When building the **full** description for issue create, append the following block **after** the `h3. Description Pattern Analysis` section (or at the end of the description if pattern analysis is skipped):
 
 ```
@@ -104,11 +104,9 @@ h3. Partner account (ACCT)
 *ACCT reference:* [{ACCT-KEY}|https://redhat.atlassian.net/browse/{ACCT-KEY}]
 ```
 
-7. **After** each such ECOPS issue is created, add a Jira issue link from the **new ECOPS issue** to the **ACCT issue** with link type **relates to**.
+7. **After** each such ECOPS issue is created, add a Jira issue link from the **new ECOPS issue** to the **resolved ACCT issue** with link type **relates to**.
 
-8. In the **Step 7** final response, add **ACCT partner links**: for each new ECOPS key, the ACCT key (and URL) linked via relates to.
-
-9. Do not search Jira to discover ACCT keys; use the table only.
+8. In the **Step 7** final response, add **ACCT partner links**: for each new ECOPS key, the ACCT key (and URL) linked via relates to, and briefly note **which ACCT issue** was chosen and **why** (for example matched summary to canonical label).
 
 ### Step 2 - Parse required sections
 
@@ -326,7 +324,7 @@ Return:
 ## Arguments
 
 - **`--file` / `-f`**: Path to a Markdown (`.md`) file whose body is the full RDS Analyzer report (same text you would paste inline).
-- **`--partner` / `-p`**: Optional telco vendor and segment for ACCT linking. Accepts vendor alone (`Nokia`, `zte`) or vendor plus `RAN` / `CORE` (case-insensitive, flexible spacing). See Step 1.6 for the vendor-to-ACCT map and Jira URL base `https://redhat.atlassian.net/browse/`.
+- **`--partner` / `-p`**: Optional telco vendor and segment for ACCT linking. Accepts vendor alone (`Nokia`, `zte`) or vendor plus `RAN` / `CORE` (case-insensitive, flexible spacing). The ACCT issue is **found by Jira search** in project `ACCT` matching that naming (see Step 1.6); there is no static key table.
 - **Free text report**: Full RDS Analyzer report body including section headings and separators, when no file flag is used.
 
 ## Return Value
