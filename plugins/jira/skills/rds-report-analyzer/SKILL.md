@@ -54,8 +54,9 @@ Ticket fields:
 
 - Project: `ECOPS`
 - Issue type: `Task`
+- Component: `RDS Deviation`
 - Summary: `RDS Guidance: Missing CR - {CR Group Name}`
-- Description template:
+- Description template (use exact spacing to avoid formatting issues):
 
 ```
 h3. RDS Analyzer Report - Missing Optional CR
@@ -71,6 +72,36 @@ h3. Missing Templates
 h3. Guidance Required
 While marked as optional, these CRs are expected in most clusters. Please clarify why they are not being used.
 ```
+
+### 2a.1 - Metadata inference (labels + version)
+
+Before creating each issue:
+
+1. Infer use-case labels from report signals:
+   - `ran`: `ran`, `du`, `cu`, `near-rt`, `telco edge`
+   - `core`: `core`, `5gc`, `amf`, `smf`, `upf`
+   - `hub`: `hub`, `acm`, `mce`, `multicluster`
+2. Always include baseline labels: `ai-generated-jira`, `rds-deviation`
+3. Detect OCP version hints (for example `4.14`, `4.15`, `4.16`) from the report.
+4. If a version is found:
+   - Attempt to resolve a matching ECOPS Target Version using project versions and version IDs.
+   - If a valid version ID cannot be resolved, add fallback label `ocp-<major>-<minor>` (for example `ocp-4-16`).
+
+### 2a.2 - Related deviation discovery and propagation
+
+After creating each issue:
+
+1. Search for related ECOPS issues:
+   - Project `ECOPS`
+   - Component `RDS Deviation`
+   - Text similarity based on deviation fingerprint terms (group name, CR name, template name when present)
+   - Exclude the newly created issue
+2. For each strong match, add issue link (`relates to`) between new and existing ticket.
+3. Determine if a related ticket is impacting (best effort):
+   - Priority `Blocker`/`Critical`, or clear impact labels/status markers.
+4. If related ticket is impacting and has Release Note Text:
+   - Add a comment to the new ticket with the related ticket reference and quoted Release Note Text.
+5. Record all linked related keys and all propagation-comment source keys for final reporting.
 
 ### 2b - Diffs requiring review
 
@@ -99,8 +130,9 @@ Ticket fields:
 
 - Project: `ECOPS`
 - Issue type: `Task`
+- Component: `RDS Deviation`
 - Summary: `RDS Guidance: {Template Name}`
-- Description template:
+- Description template (use exact spacing to avoid formatting issues):
 
 ```
 h3. RDS Analyzer Report Data
@@ -114,6 +146,14 @@ h3. Unresolved Differences
 {code}
 ```
 
+### 2b.1 - Metadata inference (labels + version)
+
+Apply the same label/version inference as section 2a before creating each diff ticket.
+
+### 2b.2 - Related deviation discovery and propagation
+
+Apply the same related-ticket linking and Release Note Text propagation flow as section 2a after each diff ticket is created.
+
 ## Validation Rules
 
 For each diff block, validate:
@@ -126,6 +166,22 @@ On validation failure:
 
 - Do not create a ticket for that block
 - Add a parsing error describing which block failed and why
+
+## Jira creation details
+
+Create each issue with:
+
+- `project_key="ECOPS"`
+- `issue_type="Task"`
+- `components=["RDS Deviation"]`
+- labels: baseline + inferred use-case labels + optional OCP fallback label
+- target version custom field when version ID is confidently resolved
+
+For related-ticket enrichment:
+
+- Use issue search to find candidate related deviations
+- Use issue link creation with `relates to`
+- Use issue comment creation for propagated Release Note Text context
 
 ## Jira Creation
 
@@ -145,6 +201,8 @@ Always return:
    - Count of Missing CR tickets created
    - Count of Diffs requiring review tickets created
    - List of issue keys and links
+   - Related tickets linked per created issue (if any)
+   - Release Note Text propagation comments added (if any)
 3. Parsing errors, if any, so user can manually review report content
 
 If no Section B items were parsed, still return the mandatory Section A statement and explicitly note that no ECOPS tickets were created.
