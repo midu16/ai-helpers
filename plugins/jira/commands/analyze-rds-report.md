@@ -1,6 +1,6 @@
 ---
 description: Parse RDS Analyzer reports and create ECOPS guidance tasks for section B items
-argument-hint: "[full RDS Analyzer report text]"
+argument-hint: "[--file <path.md>] | [full RDS Analyzer report text]"
 ---
 
 ## Name
@@ -8,7 +8,7 @@ jira:analyze-rds-report
 
 ## Synopsis
 ```
-/jira:analyze-rds-report [full RDS Analyzer report text]
+/jira:analyze-rds-report [--file|-f <path>] [full RDS Analyzer report text]
 ```
 
 ## Description
@@ -32,18 +32,51 @@ This command is intended for operational triage where missing optional CR guidan
 
 ### Step 1 - Collect report text
 
-1. Use `$ARGUMENTS` as the report body when provided.
-2. If empty, ask the user to paste the full RDS Analyzer report.
-3. Preserve original whitespace. Do not normalize indentation in diff content.
+1. Parse `$ARGUMENTS` for `--file <path>` or `-f <path>` (path may be quoted if it contains spaces).
+2. If `--file` or `-f` is present:
+   - Read the file from disk as UTF-8 text (treat a leading UTF-8 BOM as optional; strip only the BOM for processing, not other content).
+   - If the path is missing, the file is not readable, or decoding fails, stop and report a clear file error. Do not create Jira issues.
+   - Ignore any additional non-flag text in `$ARGUMENTS` when `--file` / `-f` supplies the report (the file is the sole source).
+3. If no file flag: treat the remainder of `$ARGUMENTS` as the inline report body.
+4. If there is no file and the inline body is empty, ask the user to paste the full RDS Analyzer report or pass `--file` / `-f` with a path to a Markdown (`.md`) file containing the report.
+5. Preserve original whitespace after validation. Do not normalize indentation in diff content.
+
+### Step 1.5 - Validate RDS Analyzer report shape (hard gate)
+
+Before any parsing or Jira operations, confirm the input is a real RDS Analyzer report layout (the tool emits fixed headings and a separator). If validation fails, **stop immediately**: do not create issues, do not run Section B logic. Reply only with the error block in **Step 1.5.1** (you may add a one-line hint about the file path when `--file` was used).
+
+Validation rules (all must pass):
+
+1. The text contains the exact substring `The following deviations must be addressed:` (Section A header).
+2. The text contains the exact substring `The following deviations require guidance from the telco team:` (Section B header).
+3. The first occurrence of the Section A header starts **before** the first occurrence of the Section B header.
+4. Between those two header positions (exclusive of the B header start), there is at least one line where the line equals `==================================================` after trimming trailing whitespace (the RDS Analyzer separator; exactly 50 `=` characters, no spaces).
+
+If any rule fails, the content is not an RDS Analyzer report in the expected form (for example generic Markdown notes, partial paste, or another template).
+
+#### Step 1.5.1 - Required user-facing message when validation fails
+
+Output the following (replace only `{optional-path-hint}`; use an empty string if not using `--file`):
+
+```
+The input is not a valid RDS Analyzer report and was not processed.
+
+RDS Analyzer exports a fixed structure. Your file or paste must include, in order:
+1. A "must be addressed" section whose header is exactly: The following deviations must be addressed:
+2. A separator line that contains only: ==================================================
+3. A "require guidance" section whose header is exactly: The following deviations require guidance from the telco team:
+
+Save or copy the full output from the RDS Analyzer tool (including those headings and the separator line) as Markdown if you use a .md file. {optional-path-hint}
+```
 
 ### Step 2 - Parse required sections
 
-1. Identify Section A header:
+1. Section A header (already validated):
    - `The following deviations must be addressed:`
-2. Identify Section B header:
+2. Section B header (already validated):
    - `The following deviations require guidance from the telco team:`
 3. Use `==================================================` separators to scope section boundaries.
-4. If either section cannot be located, continue with what is present and report parsing errors in the final response.
+4. If block-level content under Section B is malformed, record parsing errors in the final response (headers and separator are already guaranteed by Step 1.5).
 
 ### Step 3 - Section A handling (no tickets)
 
@@ -249,7 +282,8 @@ Return:
 
 ## Arguments
 
-- **Free text report**: Full RDS Analyzer report body including section headings and separators.
+- **`--file` / `-f`**: Path to a Markdown (`.md`) file whose body is the full RDS Analyzer report (same text you would paste inline).
+- **Free text report**: Full RDS Analyzer report body including section headings and separators, when no file flag is used.
 
 ## Return Value
 
@@ -261,6 +295,10 @@ Return:
   - Parsing/validation errors, if present
 
 ## Examples
+
+```
+/jira:analyze-rds-report --file ./cluster-rds-report.md
+```
 
 ```
 /jira:analyze-rds-report The following deviations must be addressed:

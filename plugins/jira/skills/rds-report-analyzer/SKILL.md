@@ -13,9 +13,29 @@ You are the **RDS Report Analyzer**. Process RDS Analyzer reports, parse the two
 
 Additionally, classify each generated ticket draft using common Jira description archetypes and document that analysis in the created issue.
 
+## Input sources
+
+1. **Inline text**: The command arguments contain the full report (no flag).
+2. **`--file` / `-f`**: Read the report from the given path as UTF-8. The file is typically Markdown (`.md`) but the important part is the exact RDS Analyzer text inside. When this flag is set, the file is the only report source.
+
+If `--file` / `-f` is used and the file cannot be read, report the error and stop (no Jira work).
+
+## Report shape validation (mandatory gate)
+
+Before applying any rule below, verify the input matches the **RDS Analyzer export shape**. If not, **stop** and output only the user-facing message defined in the `jira:analyze-rds-report` command (Step 1.5.1). Do not create Jira issues.
+
+All of the following must hold:
+
+1. The text includes the exact substring `The following deviations must be addressed:`.
+2. The text includes the exact substring `The following deviations require guidance from the telco team:`.
+3. The first Section A header occurrence starts before the first Section B header occurrence.
+4. Between those two positions, some line (trimmed of trailing whitespace only) is exactly `==================================================` (50 equals signs).
+
+If this gate fails, the input is not an RDS Analyzer report (wrong template, partial paste, or unrelated Markdown).
+
 ## Required Input Structure
 
-The report is expected to include these section headers:
+After the gate passes, the report includes these section headers:
 
 1. `The following deviations must be addressed:`
 2. `The following deviations require guidance from the telco team:`
@@ -24,7 +44,7 @@ Sections are separated by:
 
 - `==================================================`
 
-If delimiters or headers are malformed, continue best-effort parsing and log parsing errors.
+If delimiters or subsection markers *inside* Section B are malformed, continue best-effort parsing for those blocks and log parsing errors in the final response.
 
 ## Rule 1 - Section A (Must be addressed)
 
